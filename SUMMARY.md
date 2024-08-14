@@ -1,3 +1,8 @@
 # Table of contents
 
-* [symphony-manualbook](README.md)
+* [Installation guide](README.md)
+* [Addrbook](addrbook.md)
+* [Genesis Files](genesis-files.md)
+* [Snapshots](snapshots.md)
+* [Upgrade](upgrade.md)
+* [Cheat sheet](cheat-sheet.md)

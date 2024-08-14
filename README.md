@@ -1,39 +1,54 @@
-# symphony-manualbook
+---
+icon: hand-point-right
+---
+
+# Installation guide
+
 Instalation Guide
 
 ### Install prequirement
+
 ```
 sudo apt update && sudo apt upgrade -y
 ```
+
 ```
 sudo apt install curl tar wget clang pkg-config libssl-dev jq build-essential bsdmainutils git make ncdu gcc git jq chrony liblz4-tool -y
 ```
 
 ### Install go
+
 ```
 ver="1.21.4"
 ```
+
 ```
 wget "https://golang.org/dl/go$ver.linux-amd64.tar.gz"
 ```
+
 ```
 sudo rm -rf /usr/local/go
 ```
+
 ```
 sudo tar -C /usr/local -xzf "go$ver.linux-amd64.tar.gz"
 ```
+
 ```
 rm "go$ver.linux-amd64.tar.gz"
 ```
+
 ```
 echo "export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin" >> $HOME/.bash_profile
 source $HOME/.bash_profile
 ```
+
 ```
 go version
 ```
 
 ### Download binary
+
 ```
 cd $HOME
 git clone https://github.com/Orchestra-Labs/symphony
@@ -41,25 +56,34 @@ cd symphony
 git checkout v0.2.1
 make install
 ```
+
 ### Config Node
+
 * Init Node
+
 ```
 symphonyd init Dwentz --chain-id symphony-testnet-2
 symphonyd config chain-id symphony-testnet-2
 symphonyd config keyring-backend test
 ```
+
 * Download Genesis && AddrBook
+
 ```
 wget -O $HOME/.symphonyd/config/genesis.json https://raw.githubusercontent.com/Orchestra-Labs/symphony/main/networks/symphony-testnet-2/genesis.json
 wget -O $HOME/.symphonyd/config/addrbook.json https://raw.githubusercontent.com/vinjan23/Testnet.Guide/main/Symphony/addrbook.json
 ```
+
 * Custom port
+
 ```
 PORT=10
 ```
+
 ```
 symphonyd config node tcp://localhost:${PORT}657
 ```
+
 ```
 sed -i -e "s%^proxy_app = \"tcp://127.0.0.1:26658\"%proxy_app = \"tcp://127.0.0.1:${PORT}658\"%; s%^laddr = \"tcp://127.0.0.1:26657\"%laddr = \"tcp://127.0.0.1:${PORT}657\"%; s%^pprof_laddr = \"localhost:6060\"%pprof_laddr = \"localhost:${PORT}060\"%; s%^laddr = \"tcp://0.0.0.0:26656\"%laddr = \"tcp://0.0.0.0:${PORT}656\"%; s%^prometheus_listen_addr = \":26660\"%prometheus_listen_addr = \":${PORT}660\"%" $HOME/.symphonyd/config/config.toml
 sed -i -e "s%^address = \"tcp://localhost:1317\"%address = \"tcp://localhost:${PORT}317\"%; s%^address = \":8080\"%address = \":${PORT}080\"%; s%^address = \"localhost:9090\"%address = \"localhost:${PORT}090\"%; s%^address = \"localhost:9091\"%address = \"localhost:${PORT}091\"%; s%^address = \"0.0.0.0:8545\"%address = \"0.0.0.0:${PORT}545\"%; s%^ws-address = \"0.0.0.0:8546\"%ws-address = \"0.0.0.0:${PORT}546\"%" $HOME/.symphonyd/config/app.toml
@@ -67,6 +91,7 @@ sed -i -e "s%^address = \"tcp://localhost:1317\"%address = \"tcp://localhost:${P
 ```
 
 * Add Peers or Seed
+
 ```
 seeds=""
 sed -i.bak -e "s/^seeds =.*/seeds = \"$seeds\"/" $HOME/.symphonyd/config/config.toml
@@ -74,13 +99,16 @@ peers="016eb93b77457cbc8793ba1ee01f7e2fa2e63a3b@136.243.13.36:29156,8df964c61393
 sed -i.bak -e "s/^persistent_peers *=.*/persistent_peers = \"$peers\"/" $HOME/.symphonyd/config/config.toml
 
 ```
+
 * Setup minimum GasFee
+
 ```
 sed -i.bak -e "s/^minimum-gas-prices *=.*/minimum-gas-prices = \"0note\"/" $HOME/.symphonyd/config/app.toml
 
 ```
 
 * Setup pruning
+
 ```
 sed -i \
 -e 's|^pruning *=.*|pruning = "custom"|' \
@@ -89,7 +117,9 @@ sed -i \
 -e 's|^pruning-interval *=.*|pruning-interval = "10"|' \
 $HOME/.symphonyd/config/app.toml
 ```
+
 * Create service
+
 ```
 sudo tee /etc/systemd/system/symphonyd.service > /dev/null <<EOF
 [Unit]
@@ -107,43 +137,63 @@ LimitNOFILE=65535
 WantedBy=multi-user.target
 EOF
 ```
+
 ### Launch Node
+
 ```
 sudo systemctl daemon-reload 
 ```
+
 ```
 sudo systemctl enable symphonyd
 ```
+
 ```
 sudo systemctl restart symphonyd
 ```
+
 ### Check log node
+
 ```
 journalctl -fu symphonyd -o cat
 ```
+
 ### Wallet configuration
+
 * add wallet
+
 ```
 symphonyd keys add wallet
 ```
+
 * recover wallet
+
 ```
 symphonyd keys add wallet --recover
 ```
+
 * list wallet
+
 ```
 symphonyd keys list
 ```
+
 * delete wallet
+
 ```
 symphonyd keys delete wallet
 ```
+
 * check balances
+
 ```
 symphonyd q bank balances $(symphonyd keys show wallet -a)
 ```
+
 ### Validator Management
+
 * create validator
+
 ```
 symphonyd tx staking create-validator \
 --amount="1000000000note" \
@@ -162,7 +212,9 @@ symphonyd tx staking create-validator \
 --gas=auto \
 --from=wallet
 ```
+
 * edit validator
+
 ```
 symphonyd tx staking edit-validator \
 --new-moniker="" \
@@ -173,39 +225,55 @@ symphonyd tx staking edit-validator \
 --gas=auto \
 --from=wallet
 ```
+
 * unjail validator
+
 ```
 symphonyd tx slashing unjail --from wallet --chain-id symphony-testnet-2 --gas-prices 0.5note --gas-adjustment 1.2 --gas auto
 ```
+
 * check jailed reason
+
 ```
 symphonyd query slashing signing-info $(symphonyd tendermint show-validator)
 ```
+
 ### Token management
 
 * withdraw rewards
+
 ```
 symphonyd tx distribution withdraw-all-rewards --from wallet --chain-id symphony-testnet-2  --gas-adjustment 1.2 --gas-prices 0.5note --gas auto -y
 ```
+
 * withdraw rewards with comission
+
 ```
 symphonyd tx distribution withdraw-rewards $(symphonyd keys show wallet --bech val -a) --commission --from wallet --chain-id symphony-testnet-2  --gas-adjustment 1.2 --gas-prices 0.5note --gas auto -y
 ```
+
 * delegate token to your own validator
+
 ```
 symphonyd tx staking delegate $(symphonyd keys show wallet --bech val -a) 1000000note --from wallet --chain-id symphony-testnet-2  --gas-adjustment 1.2 --gas-prices 0.5note --gas auto -y
 ```
+
 ### Node Info
+
 * node id
+
 ```
 symphonyd status 2>&1 | jq .NodeInfo
 ```
+
 * validator info
+
 ```
 symphonyd status 2>&1 | jq .ValidatorInfo
 ```
 
 ### Delete Node
+
 ```
 sudo systemctl stop symphonyd &&
 sudo systemctl disable symphonyd &&
