@@ -4,9 +4,9 @@ icon: hand-point-right
 
 # Upgrade
 
-**Chain:** symphony-testnet-2
+**Chain:** symphony-testnet-3
 
-**Version: 0.2.1**
+**Version: 0.3.0**
 
 **Download binary :**
 
@@ -15,6 +15,6 @@ cd $HOME
 rm -rf symphony
 git clone https://github.com/Orchestra-Labs/symphony
 cd symphony
-git checkout v0.2.1
+git checkout 0.3.0
 make install
 ```
